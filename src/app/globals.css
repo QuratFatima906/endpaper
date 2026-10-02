@@ -1,0 +1,206 @@
+@import "tailwindcss";
+
+/* One source of truth for the palette. Paper, ink, one accent (ink blue). */
+:root {
+  --paper: #faf9f6;
+  --canvas: #e9e8e4;
+  --surface: #ffffff;
+  --ink: #1b1d22;
+  --muted: #5b606a;
+  --faint: #737780;
+  --rule: #c9c5bc;
+  --rule-soft: #e0ddd6;
+  --field: #cfcbc3;
+  --accent: #2a4bb5;
+  --on-accent: #ffffff;
+  --accent-wash: #e6ebf8;
+  --accent-edge: #b9c4e6;
+  --tape: rgba(42, 75, 181, 0.18);
+  --shadow: rgba(27, 29, 34, 0.18);
+  --text-scale: 1;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #17181b;
+    --canvas: #0f1012;
+    --surface: #222327;
+    --ink: #eceae5;
+    --muted: #a6a9b0;
+    --faint: #8d9098;
+    --rule: #3a3c42;
+    --rule-soft: #2c2e33;
+    --field: #4a4d55;
+    --accent: #8fa6ec;
+    --on-accent: #17181b;
+    --accent-wash: #26293a;
+    --accent-edge: #3e4460;
+    --tape: rgba(143, 166, 236, 0.22);
+    --shadow: rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #17181b;
+  --canvas: #0f1012;
+  --surface: #222327;
+  --ink: #eceae5;
+  --muted: #a6a9b0;
+  --faint: #8d9098;
+  --rule: #3a3c42;
+  --rule-soft: #2c2e33;
+  --field: #4a4d55;
+  --accent: #8fa6ec;
+  --on-accent: #17181b;
+  --accent-wash: #26293a;
+  --accent-edge: #3e4460;
+  --tape: rgba(143, 166, 236, 0.22);
+  --shadow: rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+:root[data-text="s"] { --text-scale: 0.9; }
+:root[data-text="l"] { --text-scale: 1.15; }
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-rule: var(--rule);
+  --color-rule-soft: var(--rule-soft);
+  --color-field: var(--field);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-accent-wash: var(--accent-wash);
+  --color-accent-edge: var(--accent-edge);
+  --font-serif: var(--font-newsreader), Georgia, serif;
+  --font-sans: var(--font-hanken), system-ui, sans-serif;
+  --font-hand: var(--font-kalam), cursive;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+html {
+  font-size: calc(100% * var(--text-scale));
+  background: var(--paper);
+}
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+}
+a { text-underline-offset: 3px; }
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+::placeholder { color: var(--faint); }
+
+/* Very subtle paper grain, drawn once behind everything. */
+.paper-grain {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Hand-drawn edges: an SVG displacement filter defined once in the root layout. */
+.rough { filter: url(#rough); }
+.rough-big { filter: url(#roughBig); }
+
+/* Buttons get their display from the components layer so utilities like
+   `hidden md:inline-flex` passed in from outside always win. */
+@layer components {
+  .btn { display: inline-flex; align-items: center; justify-content: center; }
+}
+
+/* Press feedback for anything tappable. */
+.press { transition: transform 160ms var(--ease-out); }
+.press:active { transform: scale(0.97); }
+
+/* Tooltip: grows from the chip it explains. */
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  z-index: 30;
+  width: max-content;
+  max-width: min(260px, calc(100vw - 16px));
+  padding: 7px 11px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--paper);
+  font: 400 12.5px/1.45 var(--font-sans);
+  text-align: left;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(calc(-50% + var(--shift, 0px))) scale(0.97);
+  transform-origin: bottom center;
+  transition: transform 125ms var(--ease-out), opacity 125ms var(--ease-out);
+}
+.tooltip[data-open="true"] { opacity: 1; transform: translateX(calc(-50% + var(--shift, 0px))) scale(1); }
+.tooltip[data-instant="true"] { transition-duration: 0ms; }
+
+/* Gentle page-turn between sections (spec §2.3). */
+@keyframes page-in {
+  from { opacity: 0; transform: translateX(6px); }
+  to { opacity: 1; transform: none; }
+}
+.page-in { animation: page-in 220ms var(--ease-out); }
+
+/* Soft fade when a photo is placed. */
+@keyframes photo-in {
+  from { opacity: 0; filter: blur(4px); transform: scale(0.98) rotate(var(--r, 0deg)); }
+  to { opacity: 1; filter: blur(0); transform: rotate(var(--r, 0deg)); }
+}
+.photo-in { animation: photo-in 320ms var(--ease-out); }
+
+/* Native <dialog> as a bottom sheet (phone) / centred card (desktop). */
+dialog.sheet {
+  margin: auto auto 0;
+  width: 100%;
+  max-width: 560px;
+  border: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 20px 20px 0 0;
+  transition: transform 300ms var(--ease-drawer), opacity 300ms var(--ease-drawer), display 300ms allow-discrete, overlay 300ms allow-discrete;
+  transform: translateY(0);
+}
+dialog.sheet:not([open]) { transform: translateY(100%); }
+@starting-style { dialog.sheet[open] { transform: translateY(100%); } }
+dialog.sheet::backdrop {
+  background: rgba(27, 29, 34, 0.35);
+  transition: opacity 300ms, display 300ms allow-discrete, overlay 300ms allow-discrete;
+  opacity: 1;
+}
+dialog.sheet:not([open])::backdrop { opacity: 0; }
+@starting-style { dialog.sheet[open]::backdrop { opacity: 0; } }
+@media (min-width: 768px) {
+  dialog.sheet { margin: auto; border-radius: 16px; }
+  dialog.sheet:not([open]) { transform: scale(0.96); opacity: 0; }
+  @starting-style { dialog.sheet[open] { transform: scale(0.96); opacity: 0; } }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; color: #000; }
+  .paper-grain { display: none; }
+}
