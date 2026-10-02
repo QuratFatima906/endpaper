@@ -14,8 +14,18 @@ export async function GET(req: Request) {
   }
   if (!allowed(target)) return new NextResponse("Host not allowed", { status: 403 });
 
-  const res = await fetch(target, { redirect: "follow" }).catch(() => null);
-  if (!res?.ok || !allowed(new URL(res.url))) return new NextResponse("Not found", { status: 404 });
+  // Follow at most 3 redirects by hand, re-checking every hop, so a redirect can never
+  // point the server at a host outside the allowlist (SSRF).
+  let res: Response | null = null;
+  for (let hop = 0; hop <= 3; hop++) {
+    res = await fetch(target, { redirect: "manual" }).catch(() => null);
+    const location = res && res.status >= 300 && res.status < 400 ? res.headers.get("location") : null;
+    if (!location) break;
+    target = new URL(location, target);
+    if (!allowed(target)) return new NextResponse("Redirect not allowed", { status: 403 });
+    res = null;
+  }
+  if (!res?.ok) return new NextResponse("Not found", { status: 404 });
   const type = res.headers.get("content-type") ?? "";
   if (!type.startsWith("image/")) return new NextResponse("Not an image", { status: 415 });
   const body = await res.arrayBuffer();
