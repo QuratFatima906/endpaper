@@ -20,6 +20,13 @@ export default function Privacy() {
           <li>What you make here: books, passages, photos, notes, check-ins, reflections, essays and pages.</li>
         </ul>
 
+        <h2>Signing in with Google</h2>
+        <p>
+          If you choose Google, we receive your name, email address and profile picture from your Google account. We use only your email address, to create
+          your account and sign you in. We don&apos;t read your Gmail, contacts, Drive or anything else, and we don&apos;t share Google account data with
+          anyone. Our use of information from Google follows the Google API Services User Data Policy, including its Limited Use requirements.
+        </p>
+
         <h2>Private by default</h2>
         <p>Everything starts private. Nothing appears on your public page until you choose to share it, book by book. You can take it down again at any time.</p>
         <p>Photos are stored in private storage that only your account can read. We strip location and camera details from photos before they are saved.</p>
@@ -28,7 +35,7 @@ export default function Privacy() {
         <ul>
           <li>No ads.</li>
           <li>We never sell or rent your data, or use it to profile you.</li>
-          <li>No tracking cookies. We use cookieless analytics that count visits without identifying you.</li>
+          <li>No tracking cookies and no analytics that identify you.</li>
         </ul>
 
         <h2>Who helps us run it</h2>
@@ -41,6 +48,14 @@ export default function Privacy() {
           <li>Delete your account from Settings → Delete account. This removes your data and photos for good, and your public pages stop working straight away.</li>
         </ul>
         <p>If you&apos;re unhappy with how we handle your data, you can complain to the Information Commissioner&apos;s Office (ico.org.uk).</p>
+        <h2>Contact</h2>
+        <p>
+          Questions about your data, or want to use one of your rights? Email 
+          <a href="mailto:quratfatima581@gmail.com" className="text-accent underline">
+            quratfatima581@gmail.com
+          </a>
+          .
+        </p>
       </article>
     </AccountFrame>
   );

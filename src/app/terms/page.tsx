@@ -33,6 +33,14 @@ export default function Terms() {
 
         <h2>Changes</h2>
         <p>If these terms change in a way that matters, we&apos;ll tell you in the app first.</p>
+        <h2>Contact</h2>
+        <p>
+          Questions about these terms? Email 
+          <a href="mailto:quratfatima581@gmail.com" className="text-accent underline">
+            quratfatima581@gmail.com
+          </a>
+          .
+        </p>
       </article>
     </AccountFrame>
   );
