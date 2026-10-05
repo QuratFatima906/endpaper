@@ -19,6 +19,7 @@ export default function LibraryPage() {
 
 const EMPTY_TAB: Record<Status, string> = {
   reading: "Nothing on the go. Add what you're reading now.",
+  shelf: "Nothing waiting. Add books you own but haven't started, so you don't forget them.",
   finished: "No finished books yet.",
   set_aside: "Nothing set aside.",
 };

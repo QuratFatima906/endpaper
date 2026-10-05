@@ -129,7 +129,12 @@ function BookScreen() {
     );
 
   async function setStatus(s: Status) {
-    await patch<Book>("books", id, { status: s, finished_at: s === "finished" ? (book?.finished_at ?? now()) : null });
+    await patch<Book>("books", id, {
+      status: s,
+      finished_at: s === "finished" ? (book?.finished_at ?? now()) : null,
+      // Taken off the shelf: reading starts now.
+      ...(s === "reading" && !book?.started_at && { started_at: now() }),
+    });
     setStatusOpen(false);
   }
 

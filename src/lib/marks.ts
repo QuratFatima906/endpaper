@@ -13,6 +13,7 @@ export const markOf = (m: Mark | null | undefined) => MARKS.find((x) => x.id ===
 
 export const STATUSES: { id: Status; label: string }[] = [
   { id: "reading", label: "Reading" },
+  { id: "shelf", label: "On the shelf" },
   { id: "finished", label: "Finished" },
   { id: "set_aside", label: "Set aside" },
 ];

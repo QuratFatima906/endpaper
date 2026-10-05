@@ -34,7 +34,7 @@ export const longDate = (d: string) => new Date(d).toLocaleDateString("en-GB", {
 export const paragraphs = (s: string) => s.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 
 export function readingLine(b: PublicBookData["book"]) {
-  const when = b.status === "finished" ? (b.finished_at ? `Finished ${monthYear(b.finished_at)}` : "Finished") : b.status === "reading" ? "Reading now" : "Set aside";
+  const when = b.status === "finished" ? (b.finished_at ? `Finished ${monthYear(b.finished_at)}` : "Finished") : b.status === "reading" ? "Reading now" : b.status === "shelf" ? "On the shelf" : "Set aside";
   return [b.author, when].filter(Boolean).join(" · ");
 }
 
