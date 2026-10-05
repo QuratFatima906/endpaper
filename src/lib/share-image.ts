@@ -31,19 +31,32 @@ export async function captureImage(node: HTMLElement): Promise<Blob> {
   return blob;
 }
 
-/** Hand the image to the phone's share sheet, or download it on desktop. */
-export async function shareOrDownload(blob: Blob, name: string, title: string) {
-  const file = new File([blob], name, { type: "image/png" });
-  if (navigator.canShare?.({ files: [file] })) {
+/**
+ * Called from a click so the browser allows the picker/share sheet.
+ * Chrome/Edge: "Save as" dialog. Phones: share sheet (Save Image lives there).
+ * Elsewhere: a plain download, which goes wherever the browser saves downloads.
+ */
+export async function saveImage(blob: Blob, name: string) {
+  const w = window as unknown as { showSaveFilePicker?: (o: object) => Promise<FileSystemFileHandle> };
+  if (w.showSaveFilePicker) {
     try {
-      await navigator.share({ files: [file], title });
-      return;
+      const handle = await w.showSaveFilePicker({ suggestedName: name, types: [{ description: "PNG image", accept: { "image/png": [".png"] } }] });
+      const out = await handle.createWritable();
+      await out.write(blob);
+      await out.close();
     } catch (e) {
-      if ((e as Error).name === "AbortError") return; // user closed the sheet
+      if ((e as Error).name !== "AbortError") throw e; // AbortError = user cancelled
     }
+    return;
+  }
+  const file = new File([blob], name, { type: "image/png" });
+  if (matchMedia("(pointer: coarse)").matches && navigator.canShare?.({ files: [file] })) {
+    await navigator.share({ files: [file] }).catch((e: Error) => {
+      if (e.name !== "AbortError") throw e;
+    });
+    return;
   }
   const url = URL.createObjectURL(blob);
-  const a = Object.assign(document.createElement("a"), { href: url, download: name });
-  a.click();
+  Object.assign(document.createElement("a"), { href: url, download: name }).click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
