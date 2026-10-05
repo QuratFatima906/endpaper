@@ -6,7 +6,8 @@ import { db } from "@/lib/db";
 import { markOf } from "@/lib/marks";
 import { addPage, newId, patch, remove } from "@/lib/repo";
 import type { PageItem, Passage, ScrapPage } from "@/lib/types";
-import { BottomAction, Button, Empty, RoughBorder, Sheet, TextArea, cx } from "@/components/ui";
+import { BottomAction, Button, Empty, RoughBorder, Sheet, TextArea } from "@/components/ui";
+import { cx } from "@/lib/cx";
 import { Portal, useDraft } from "@/components/book-draft";
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));

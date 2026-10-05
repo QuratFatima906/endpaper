@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import { cx, RoughBorder } from "@/components/ui";
+import { RoughBorder } from "@/components/ui";
+import { cx } from "@/lib/cx";
 import { checkUsername } from "@/lib/session";
 
 export type Check = { state: "idle" | "checking" | "ok" | "bad"; message?: string; name?: string };

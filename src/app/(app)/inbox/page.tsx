@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { AppHeader, BackLink, Button, ButtonLink, Chip, Empty, Eyebrow, Page, RoughBorder, Sheet, TippedPhoto, cx, useTooltip } from "@/components/ui";
+import { AppHeader, BackLink, Button, ButtonLink, Chip, Empty, Eyebrow, Page, RoughBorder, Sheet, TippedPhoto, useTooltip } from "@/components/ui";
+import { cx } from "@/lib/cx";
 import { db } from "@/lib/db";
 import { MARKS } from "@/lib/marks";
 import { updatePassage } from "@/lib/repo";
