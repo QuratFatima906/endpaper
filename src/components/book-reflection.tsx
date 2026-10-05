@@ -6,7 +6,8 @@ import { db } from "@/lib/db";
 import { VERDICTS } from "@/lib/marks";
 import { saveReflection } from "@/lib/repo";
 import type { Checkin, Reflection } from "@/lib/types";
-import { BottomAction, ButtonLink, Eyebrow, Rule, SavedHint, cx } from "@/components/ui";
+import { BottomAction, ButtonLink, Eyebrow, Rule, SavedHint } from "@/components/ui";
+import { cx } from "@/lib/cx";
 import { Portal, useDraft } from "@/components/book-draft";
 
 type Field = "takeaway" | "understood" | "unsure" | "recommend";

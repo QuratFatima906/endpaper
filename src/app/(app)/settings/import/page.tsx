@@ -2,7 +2,8 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo, useState, type ChangeEvent, type ReactNode } from "react";
-import { AppHeader, BackLink, Button, ButtonLink, cx, Page, Rule } from "@/components/ui";
+import { AppHeader, BackLink, Button, ButtonLink, Page, Rule } from "@/components/ui";
+import { cx } from "@/lib/cx";
 import { db } from "@/lib/db";
 import { checkedByDefault, isDuplicate, parseGoodreads, statusFor, type GoodreadsBook } from "@/lib/goodreads";
 import { addBook } from "@/lib/repo";

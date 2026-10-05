@@ -7,7 +7,8 @@ import { extractText } from "@/lib/images";
 import { MARKS } from "@/lib/marks";
 import { deleteImage, remove, updatePassage } from "@/lib/repo";
 import type { Mark, Passage } from "@/lib/types";
-import { Button, Eyebrow, Label, RoughBorder, Rule, SavedHint, Sheet, TextArea, TextField, TippedPhoto, cx, useTooltip } from "@/components/ui";
+import { Button, Eyebrow, Label, RoughBorder, Rule, SavedHint, Sheet, TextArea, TextField, TippedPhoto, useTooltip } from "@/components/ui";
+import { cx } from "@/lib/cx";
 import { useDraft } from "@/components/book-draft";
 
 /** The five printer's marks as big glyph buttons (capture + passage detail). Tap again to clear. */

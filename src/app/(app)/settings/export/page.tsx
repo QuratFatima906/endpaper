@@ -2,7 +2,8 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
-import { AppHeader, BackLink, Button, cx, Page, RoughBorder } from "@/components/ui";
+import { AppHeader, BackLink, Button, Page, RoughBorder } from "@/components/ui";
+import { cx } from "@/lib/cx";
 import { db } from "@/lib/db";
 import { download, exportZip } from "@/lib/export";
 import { markOf, statusLabel } from "@/lib/marks";

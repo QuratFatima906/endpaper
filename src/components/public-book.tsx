@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Cover, Eyebrow, Logo, MarginNote, MarkGlyph, Rule, cx } from "@/components/ui";
+import { Cover, Eyebrow, Logo, MarginNote, MarkGlyph, Rule } from "@/components/ui";
+import { cx } from "@/lib/cx";
 import { VERDICTS } from "@/lib/marks";
 import type { Book, Mark, PageItem, Reflection, Verdict } from "@/lib/types";
 

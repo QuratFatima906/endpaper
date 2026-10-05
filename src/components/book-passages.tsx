@@ -6,7 +6,8 @@ import { useState } from "react";
 import { db } from "@/lib/db";
 import { ALL_HINT, MARKS } from "@/lib/marks";
 import type { Mark } from "@/lib/types";
-import { BottomAction, ButtonLink, Chip, Empty, MarginNote, MarkGlyph, RoughBorder, TippedPhoto, cx } from "@/components/ui";
+import { BottomAction, ButtonLink, Chip, Empty, MarginNote, MarkGlyph, RoughBorder, TippedPhoto } from "@/components/ui";
+import { cx } from "@/lib/cx";
 import { PassageEditor } from "@/components/book-passage-editor";
 import { Portal } from "@/components/book-draft";
 

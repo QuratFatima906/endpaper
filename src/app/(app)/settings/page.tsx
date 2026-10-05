@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
-import { AppHeader, BackLink, Button, Chip, cx, Eyebrow, Page, Rule, Sheet } from "@/components/ui";
+import { AppHeader, BackLink, Button, Chip, Eyebrow, Page, Rule, Sheet } from "@/components/ui";
+import { cx } from "@/lib/cx";
 import { patch } from "@/lib/repo";
 import { signOut, useSession } from "@/lib/session";
 import { cloudEnabled } from "@/lib/supabase";

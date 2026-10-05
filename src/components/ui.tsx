@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { cx } from "@/lib/cx";
 import { useLiveQuery } from "dexie-react-hooks";
 import { forwardRef, useEffect, useId, useMemo, useRef, useState, type ComponentProps, type ReactNode } from "react";
 import { db } from "@/lib/db";
@@ -9,7 +10,7 @@ import { useSession } from "@/lib/session";
 import { loadImage, useSyncState } from "@/lib/sync";
 import type { Book, Mark } from "@/lib/types";
 
-const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(" ");
+
 
 /** SVG filters used by every hand-drawn edge. Rendered once in the root layout. */
 export function RoughDefs() {
@@ -483,4 +484,3 @@ export function SavedHint({ at }: { at: string | undefined }) {
   );
 }
 
-export { cx };
