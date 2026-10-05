@@ -63,7 +63,7 @@ export async function addBook(b: Pick<Book, "title" | "author"> & Partial<Book>)
     status: "reading",
     visibility: "private",
     share: NO_SHARE,
-    started_at: now(),
+    started_at: b.status === "shelf" ? null : now(), // shelf books start when moved to Reading
     finished_at: null,
     source: "manual",
     goodreads_rating: null,

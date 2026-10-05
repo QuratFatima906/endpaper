@@ -1,6 +1,6 @@
 // Records mirror the Postgres rows 1:1 (snake_case) so sync needs no mapping layer.
 
-export type Status = "reading" | "finished" | "set_aside";
+export type Status = "reading" | "shelf" | "finished" | "set_aside";
 export type Visibility = "private" | "unlisted" | "public";
 export type Mark = "key" | "loved" | "confusing" | "disagree" | "glossary";
 export type Verdict = "loved" | "liked" | "not_for_me";
