@@ -102,9 +102,9 @@ export async function sendMagicLink(email: string) {
   if (error) throw error;
 }
 
-export async function signInWithGoogle() {
-  if (!cloudEnabled) throw new Error("Google sign-in needs Supabase to be configured.");
-  const { error } = await supabase().auth.signInWithOAuth({ provider: "google", options: { redirectTo: redirect() } });
+/** Google's ID token from the GIS button; `nonce` is the raw value whose SHA-256 went to Google. */
+export async function signInWithGoogleToken(token: string, nonce: string) {
+  const { error } = await supabase().auth.signInWithIdToken({ provider: "google", token, nonce });
   if (error) throw error;
 }
 

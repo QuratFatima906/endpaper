@@ -96,6 +96,10 @@ body {
   min-height: 100dvh;
 }
 a { text-underline-offset: 3px; }
+/* Tailwind v4 preflight resets buttons to cursor: default. */
+@layer base {
+  button:not(:disabled), [role="button"]:not([aria-disabled="true"]) { cursor: pointer; }
+}
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;

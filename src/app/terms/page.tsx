@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "Terms" };
 
 export default function Terms() {
   return (
-    <AccountFrame>
+    <AccountFrame prose>
       <BackLink href="/">Back</BackLink>
       <article className="mt-6 flex flex-col gap-4 text-[15px] leading-[1.6] [&_h2]:mt-4 [&_h2]:font-serif [&_h2]:text-[22px] [&_ul]:list-disc [&_ul]:pl-5">
         <h1 className="font-serif text-4xl leading-[1.1]">Terms</h1>
@@ -35,7 +35,7 @@ export default function Terms() {
         <p>If these terms change in a way that matters, we&apos;ll tell you in the app first.</p>
         <h2>Contact</h2>
         <p>
-          Questions about these terms? Email 
+          Questions about these terms? Email{" "}
           <a href="mailto:quratfatima581@gmail.com" className="text-accent underline">
             quratfatima581@gmail.com
           </a>

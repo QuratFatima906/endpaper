@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "Privacy" };
 
 export default function Privacy() {
   return (
-    <AccountFrame>
+    <AccountFrame prose>
       <BackLink href="/">Back</BackLink>
       <article className="mt-6 flex flex-col gap-4 text-[15px] leading-[1.6] [&_h2]:mt-4 [&_h2]:font-serif [&_h2]:text-[22px] [&_ul]:list-disc [&_ul]:pl-5">
         <h1 className="font-serif text-4xl leading-[1.1]">Privacy</h1>
@@ -50,7 +50,7 @@ export default function Privacy() {
         <p>If you&apos;re unhappy with how we handle your data, you can complain to the Information Commissioner&apos;s Office (ico.org.uk).</p>
         <h2>Contact</h2>
         <p>
-          Questions about your data, or want to use one of your rights? Email 
+          Questions about your data, or want to use one of your rights? Email{" "}
           <a href="mailto:quratfatima581@gmail.com" className="text-accent underline">
             quratfatima581@gmail.com
           </a>

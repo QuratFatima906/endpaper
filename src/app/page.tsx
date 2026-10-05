@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
+import { GoogleButton } from "@/components/google-button";
 import { Button, Logo, TextField } from "@/components/ui";
-import { sendMagicLink, signInWithGoogle, useSession } from "@/lib/session";
+import { sendMagicLink, useSession } from "@/lib/session";
 import { cloudEnabled } from "@/lib/supabase";
 
 export default function Welcome() {
@@ -30,15 +31,6 @@ export default function Welcome() {
     } catch (err) {
       setError((err as Error).message || "Couldn't send the link. Are you online?");
       setBusy(false);
-    }
-  }
-
-  async function google() {
-    setError(null);
-    try {
-      await signInWithGoogle();
-    } catch (err) {
-      setError((err as Error).message || "Couldn't reach Google. Are you online?");
     }
   }
 
@@ -74,9 +66,7 @@ export default function Welcome() {
           {cloudEnabled && (
             <>
               <p className="text-center text-[13px] text-muted">or</p>
-              <Button variant="outline" onClick={google} className="md:h-12">
-                Continue with Google
-              </Button>
+              <GoogleButton onError={setError} />
             </>
           )}
           <nav aria-label="Legal" className="mt-[10px] flex justify-center gap-[18px] text-[13px] text-muted md:mt-[14px]">

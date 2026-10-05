@@ -3,12 +3,12 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { PublicBook, PublicEssay, type PublicBookData } from "@/components/public-book";
-import { Empty, Logo, Page, RoughDefs } from "@/components/ui";
+import { Button, Empty, Logo, Page, RoughDefs, Sheet } from "@/components/ui";
 import { db } from "@/lib/db";
 import { useSession } from "@/lib/session";
-import { captureImage, shareOrDownload } from "@/lib/share-image";
+import { captureImage, saveImage } from "@/lib/share-image";
 
 // R-PUB-6: what a visitor would see, built from LOCAL data with exactly the rules the
 // server’s RLS applies: share toggles, hidden passages out, text only (never photos).
@@ -30,7 +30,11 @@ function Preview() {
   const { profile } = useSession();
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [image, setImage] = useState<{ blob: Blob; url: string } | null>(null);
   const shot = useRef<HTMLDivElement>(null);
+
+  // Free the preview's object URL when it's replaced or the page goes away.
+  useEffect(() => () => void (image && URL.revokeObjectURL(image.url)), [image]);
 
   const data = useLiveQuery(async () => {
     const book = await db.books.get(id);
@@ -70,12 +74,18 @@ function Preview() {
     essay: essay?.published_at ? { title: essay.title, href: `/@${username}/${book.slug}/essay` } : null,
   };
 
-  const save = async () => {
+  const close = () => {
+    setImage(null);
+    setFailed(false);
+  };
+  const fileName = `${book.slug}${essayView ? "-essay" : ""}.png`;
+  // Capture once and show it; the actual save happens from the sheet's button.
+  const capture = async () => {
     setSaving(true);
     setFailed(false);
     try {
       const blob = await captureImage(shot.current!);
-      await shareOrDownload(blob, `${book.slug}${essayView ? "-essay" : ""}.png`, book.title);
+      setImage({ blob, url: URL.createObjectURL(blob) });
     } catch (e) {
       console.warn("[save image]", e);
       setFailed(true);
@@ -92,12 +102,12 @@ function Preview() {
           <span className="hidden md:inline"> · {typeof location === "undefined" ? path : location.host + path}</span>
         </p>
         <div className="flex items-center gap-5">
-          <button type="button" disabled={saving} onClick={save} className="min-h-11 underline disabled:opacity-60">
-            {saving ? "Saving…" : failed ? "Couldn't save, try again" : "Save as image"}
+          <button type="button" disabled={saving} onClick={capture} className="min-h-11 underline disabled:opacity-60">
+            {saving ? "Making image…" : failed ? "Couldn't save, try again" : "Save as image"}
           </button>
           {/* A fixed destination: history.back() misbehaves when the preview was opened directly. */}
           <Link href={essayView ? `/essay?id=${book.id}` : `/book?id=${book.id}`} className="inline-flex min-h-11 items-center underline">
-            Exit<span className="hidden md:inline"> preview</span>
+            Exit<span className="hidden md:inline">&nbsp;preview</span>
           </Link>
         </div>
       </div>
@@ -129,6 +139,33 @@ function Preview() {
         </div>
         <p className="mt-16 text-xs text-muted md:text-[13px]">Photos, check-in notes and hidden passages aren’t shown. Margin notes on shared passages are.</p>
       </Page>
+      <Sheet open={!!image} onClose={close} title="Save as image" className="md:w-[560px]">
+        <h2 className="font-serif text-2xl">Save as image</h2>
+        {image && (
+          // eslint-disable-next-line @next/next/no-img-element -- local blob URL
+          <img src={image.url} alt={`Preview of ${book.title}`} className="max-h-[55dvh] w-full rounded-lg border border-rule-soft object-contain" />
+        )}
+        {failed && <p className="text-[13px] text-muted">Couldn&apos;t save. Try again.</p>}
+        <div className="flex justify-end gap-3">
+          <Button variant="quiet" size="md" onClick={close}>
+            Cancel
+          </Button>
+          <Button
+            size="md"
+            onClick={() =>
+              saveImage(image!.blob, fileName).then(
+                close,
+                (e) => {
+                  console.warn("[save image]", e);
+                  setFailed(true);
+                },
+              )
+            }
+          >
+            Save
+          </Button>
+        </div>
+      </Sheet>
     </>
   );
 }
