@@ -195,6 +195,43 @@ function SmallPassage({ p }: { p: SharedPassage }) {
   );
 }
 
+const WORDS_SHOWN = 8;
+
+/** The reader's glossary on a taped sheet: a sidebar card, or full width when alone. Long lists fold. */
+function Words({ words, wide = false }: { words: PublicBookData["words"]; wide?: boolean }) {
+  const list = (ws: PublicBookData["words"]) => (
+    <dl className={cx("m-0 mt-4", wide && "gap-12 sm:columns-2 md:columns-3")}>
+      {ws.map((w) => (
+        <div key={w.id} className="mb-4 flex break-inside-avoid flex-col gap-[2px]">
+          <dt dir="auto" className="font-serif text-xl italic">{w.word}</dt>
+          {w.definition && <dd dir="auto" className="m-0 font-hand text-base leading-[1.35] text-accent">{w.definition}</dd>}
+        </div>
+      ))}
+    </dl>
+  );
+  return (
+    <section aria-label="Words" className={cx("relative self-start bg-surface px-7 pt-8 pb-3 text-ink shadow-[0_2px_3px_rgba(27,29,34,.08),0_14px_28px_-12px_var(--shadow)]", wide ? "w-full rotate-[-0.3deg] md:px-10" : "rotate-[-0.8deg] md:mt-6")}>
+      <span aria-hidden="true" className="rough-big absolute -top-3 right-10 h-7 w-24 rotate-[-3deg]" style={{ background: "var(--tape)" }} />
+      <div className="flex items-baseline gap-2">
+        <span className="font-serif text-lg text-accent italic" aria-hidden="true">
+          g.
+        </span>
+        <span className="text-xs font-medium tracking-[.08em] text-muted uppercase">Words</span>
+      </div>
+      {list(words.slice(0, WORDS_SHOWN))}
+      {words.length > WORDS_SHOWN && (
+        <details className="group">
+          <summary className="mb-4 inline-flex min-h-11 cursor-pointer list-none items-center text-sm text-muted underline [&::-webkit-details-marker]:hidden">
+            <span className="group-open:hidden">Show all {words.length} words</span>
+            <span className="hidden group-open:inline">Show fewer</span>
+          </summary>
+          {list(words.slice(WORDS_SHOWN))}
+        </details>
+      )}
+    </section>
+  );
+}
+
 /** Loved first, then key points; up to two get the big treatment. */
 function splitPassages(passages: SharedPassage[]) {
   const rank = (p: SharedPassage) => (p.mark === "loved" ? 0 : p.mark === "key" ? 1 : 2);
@@ -260,43 +297,22 @@ export function PublicBook({ data, headingLevel = 1 }: { data: PublicBookData; h
         </section>
       )}
 
-      {/* Key points + words */}
-      {(points.length > 0 || words.length > 0) && (
+      {/* Key points + words; words alone get the full width instead of a sidebar next to nothing. */}
+      {points.length === 0 && words.length > 0 && <Words words={words} wide />}
+      {points.length > 0 && (
         <div className="grid gap-14 md:grid-cols-[minmax(0,1fr)_minmax(0,380px)] md:gap-20">
-          {points.length > 0 ? (
-            <section aria-label="Key points" className="flex flex-col gap-8">
-              <SectionHead>Key points</SectionHead>
-              <ol className="m-0 flex list-none flex-col gap-5 p-0">
-                {points.map((pt, i) => (
-                  <li key={i} className="flex gap-4 font-serif text-lg leading-[1.5] md:text-xl">
-                    <span className="w-5 flex-none font-serif text-accent italic">{i + 1}</span>
-                    <span className="[text-wrap:pretty]">{pt}</span>
-                  </li>
-                ))}
-              </ol>
-            </section>
-          ) : (
-            <div className="hidden md:block" />
-          )}
-          {words.length > 0 && (
-            <section aria-label="Words" className="relative rotate-[-0.8deg] self-start bg-white px-7 pt-8 pb-7 text-[#1b1d22] shadow-[0_2px_3px_rgba(27,29,34,.08),0_14px_28px_-12px_var(--shadow)] md:mt-6">
-              <span aria-hidden="true" className="rough-big absolute -top-3 right-10 h-7 w-24 rotate-[-3deg]" style={{ background: "var(--tape)" }} />
-              <div className="flex items-baseline gap-2">
-                <span className="font-serif text-lg text-[#2a4bb5] italic" aria-hidden="true">
-                  g.
-                </span>
-                <span className="text-xs font-medium tracking-[.08em] text-[#5b606a] uppercase">Words</span>
-              </div>
-              <dl className="m-0 mt-4 flex flex-col gap-4">
-                {words.map((w) => (
-                  <div key={w.id} className="flex flex-col gap-[2px]">
-                    <dt className="font-serif text-xl italic">{w.word}</dt>
-                    {w.definition && <dd className="m-0 font-hand text-base leading-[1.35] text-[#2a4bb5]">{w.definition}</dd>}
-                  </div>
-                ))}
-              </dl>
-            </section>
-          )}
+          <section aria-label="Key points" className="flex flex-col gap-8">
+            <SectionHead>Key points</SectionHead>
+            <ol className="m-0 flex list-none flex-col gap-5 p-0">
+              {points.map((pt, i) => (
+                <li key={i} className="flex gap-4 font-serif text-lg leading-[1.5] md:text-xl">
+                  <span className="w-5 flex-none font-serif text-accent italic">{i + 1}</span>
+                  <span className="[text-wrap:pretty]">{pt}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+          {words.length > 0 && <Words words={words} />}
         </div>
       )}
 
