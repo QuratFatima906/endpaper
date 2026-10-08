@@ -19,6 +19,7 @@ Short log of choices the requirements didn't settle (spec §0.1). Newest last.
 | 2026-09-30 | **PDF export uses the browser's print dialog** with a print stylesheet. | Native "Save as PDF" everywhere; no PDF library. | A client-side PDF library such as pdf-lib or react-pdf. |
 | 2026-09-30 | **Public passages expose transcribed text only; photos are never served publicly.** | R-PUB-10 default until the legal position is verified. | Public photos per section. |
 | 2026-09-30 | **Check-in free text is never public**: the mood line is served by `public_mood_line()` (date, mood, understanding only). | Row-level security can't hide individual columns. | Column-level grants on a view. |
+| 2026-10-08 | **Client queries filter by owner explicitly; RLS is the safety net, not the filter.** The sync pull uses `.eq("user_id", me)` and drops foreign rows already on the device. | Permissive RLS policies are OR'd: `public_read` made an unfiltered pull return every user's shared rows ([incident](docs/incidents/2026-10-08-sync-pulled-other-users-rows.md)). | Rely on RLS alone (broke as soon as a public policy was added); a separate `my_rows` view (more schema for one `.eq`). |
 
 ## Proposed additions (not built)
 - Admin dashboard + moderation queue UI (R-ADM-*): the design file's admin flow was truncated in the export; `reports` and `deletion_log` tables are ready.

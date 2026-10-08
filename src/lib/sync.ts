@@ -55,13 +55,23 @@ async function pushTable(t: SyncTable) {
   }
 }
 
+// Profiles are keyed by the user id itself; every other table carries user_id.
+const ownerCol = (t: SyncTable) => (t === "profiles" ? "id" : "user_id");
+
 async function pullTable(t: SyncTable) {
+  // Public-read RLS lets any signed-in user see other people's shared books, so the pull
+  // must ask for this user's rows explicitly or it copies strangers' shelves onto the device.
+  const me = userId();
+  const owner = ownerCol(t);
+  // Clear out anything another user's rows left here (devices that synced before this filter).
+  await db[t].filter((r) => (r as Record<string, unknown>)[owner] !== me && !r._dirty).delete();
   const key = `cursor:${t}`;
   let cursor = (await getMeta<string>(key)) ?? "1970-01-01T00:00:00Z";
   for (;;) {
     const { data, error } = await supabase()
       .from(t)
       .select("*")
+      .eq(owner, me)
       .gt("server_updated_at", cursor)
       .order("server_updated_at", { ascending: true })
       .limit(500);
