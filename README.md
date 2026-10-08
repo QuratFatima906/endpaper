@@ -29,7 +29,7 @@ First-time setup (Supabase, sign-in, Google, deploy) is in [docs/SETUP.md](docs/
 - **Private app** (`src/app/(app)/*`): static client routes with query params (`/book?id=`). The service worker precaches every shell, so a cold start works with no network.
 - **Data**: every write lands in IndexedDB first. `src/lib/sync.ts` pushes dirty rows and pulls changes by a server-stamped cursor. Conflicts resolve last-write-wins per row.
 - **Public side** (`src/app/u/*`, served at `/@username`): server-rendered from Supabase with the anon key. Row-level security decides what is visible. Photos are never public.
-- Decisions and their reasons are in [DECISIONS.md](DECISIONS.md).
+- Full system design (diagrams, trade-offs, security, scaling): [ARCHITECTURE.md](ARCHITECTURE.md). Smaller decisions: [DECISIONS.md](DECISIONS.md).
 
 ## Scaling notes
 - Reads never hit the server, so load scales with writes, which are tiny rows.
