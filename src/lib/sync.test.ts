@@ -23,10 +23,12 @@ vi.mock("./supabase", () => ({
         },
         select: () => {
           let after = "";
+          const eq: [string, unknown][] = [];
           const q = {
+            eq: (c: string, v: unknown) => (eq.push([c, v]), q),
             gt: (_c: string, v: string) => ((after = v), q),
             order: () => q,
-            limit: async () => ({ data: rows.filter((r) => (r.server_updated_at as string) > after), error: null }),
+            limit: async () => ({ data: rows.filter((r) => (r.server_updated_at as string) > after && eq.every(([c, v]) => r[c] === v)), error: null }),
           };
           return q;
         },
@@ -70,4 +72,13 @@ test("a newer unsynced local edit is not overwritten by an older remote row", as
   await syncNow();
   expect((await db.books.get(id))!.title).toBe("Mine, newer");
   expect(server.books.find((r) => r.id === id)!.title).toBe("Mine, newer");
+});
+
+test("pull ignores other users' shared rows and clears ones already on the device", async () => {
+  // Public-read RLS returns another reader's shared book; it must not land on this device.
+  server.books.push({ id: "ali", user_id: "u2", title: "Someone else's", updated_at: "2026-01-02T00:00:00Z", deleted_at: null, server_updated_at: stamp() });
+  await db.books.put({ id: "old", user_id: "u2", title: "Pulled before the fix", _dirty: 0 } as never);
+  await syncNow();
+  expect(await db.books.get("ali")).toBeUndefined();
+  expect(await db.books.get("old")).toBeUndefined();
 });

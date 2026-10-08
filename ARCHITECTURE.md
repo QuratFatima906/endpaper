@@ -136,7 +136,7 @@ sequenceDiagram
     S->>P: upsert dirty rows (chunks of 200)
     P-->>P: trigger stamps server_updated_at
     S->>D: clear _dirty only if row unchanged since read
-    S->>P: pull rows where server_updated_at > cursor (pages of 500)
+    S->>P: pull own rows (user_id = me) where server_updated_at > cursor (pages of 500)
     S->>D: put remote rows unless local is dirty and newer
   else offline
     S-->>UI: status "offline · N pending"
@@ -254,7 +254,7 @@ ADR-style summary. Each row is a decision a reviewer is likely to question.
 | **Next.js App Router, private routes static plus query params** (`/book?id=`) | Every private shell can be precached by the service worker, so a cold offline start works even for a book never opened on this device. | Dynamic segments (`/book/[id]`): an unvisited URL has no cached shell offline. | n/a, core to G1. |
 | **Public pages SSR, `force-dynamic`** | Unpublishing must take effect immediately (privacy over cache hit rate). Open Graph and SEO need HTML. | ISR/static: a stale page could keep showing content the owner just made private. | Traffic grows (see §8; cache with tag-based purge on publish changes). |
 | **Supabase (Postgres, Auth, Storage)** | One vendor for three needs. RLS puts authorization next to the data. Generous free tier (G4). Plain Postgres, so no lock-in at the data layer. | Firebase (NoSQL, harder relational queries, more lock-in). A custom API plus RDS (more to build, run and secure). | n/a |
-| **Authorization in RLS, not an API layer** | The browser talks to Postgres directly, with every table under owner-only policies. There's no hand-written CRUD API to get wrong. | A REST/GraphQL backend enforcing ownership in code (every new endpoint is a chance to forget the check). | n/a |
+| **Authorization in RLS, not an API layer** | The browser talks to Postgres directly, with every table under owner policies (plus `public_read` on shareable tables). There's no hand-written CRUD API to get wrong. Because permissive policies are OR'd, a signed-in query must still filter by owner itself; RLS bounds what it *may* read, not what it *should* (see the [2026-10-08 incident](docs/incidents/2026-10-08-sync-pulled-other-users-rows.md)). | A REST/GraphQL backend enforcing ownership in code (every new endpoint is a chance to forget the check). | n/a |
 | **Service role confined to one route** | Only account deletion needs to cross RLS. The key is server-only and never in the bundle. | Using service role for convenience elsewhere (one bug becomes a full data breach). | n/a |
 | **Hand-written service worker (~100 lines)** | Precise control over what is cached. Avoids coupling a build plugin to Next 16/Turbopack. | Serwist/Workbox (more abstraction than needed). | Precaching needs become complex. |
 | **On-device OCR (Tesseract.js, lazy-loaded)** | Photos never leave the device to be read, which is good for privacy. Works offline once the model is cached. No per-call API cost. | Cloud OCR (Google Vision): better accuracy, but sends private photos to a third party, costs money and needs network. | Accuracy complaints on handwriting or poor light. |
@@ -298,6 +298,7 @@ The browser is treated as hostile. **Every** guarantee is enforced in Postgres o
 | **Information disclosure**: private content on public pages | RLS `public_read` requires `visibility ≠ private`, a per-section `share` flag, `not hidden`, `deleted_at is null`. Check-in free text is unreachable (served only via `public_mood_line()`, which returns date, mood and score). Passage `image_id` is never selected. Photos have no public path at all. Unlisted pages get `noindex`. | `0001_init.sql`, `data.ts`, `[slug]/page.tsx` |
 | | EXIF (including GPS) stripped by re-encoding through canvas before storage. | `images.ts` |
 | | Shared device: sign-out wipes IndexedDB after a final push. | `signOut()` |
+| | Other users' shared rows on a device: the sync pull filters by owner (`.eq("user_id", me)`) and deletes any non-dirty foreign rows already stored locally. | `sync.ts` `pullTable` |
 | **Denial of service** | Vercel platform protections. `/api/cover` caps the body at 5 MB and is allowlisted. **Gap:** `/api/report` has no rate limit (marked `ponytail:`). | `route.ts` files |
 | **Elevation of privilege** | Service role key exists only in server env, used in one route. `security definer` functions pin `search_path = public` and are minimal. `book_shares` execute is revoked from `public` and granted explicitly. | `supabase.ts`, `0001_init.sql` |
 | **SSRF** via cover proxy | Host allowlist, https only, redirects followed manually (max 3) with **every hop re-validated**, `image/*` content type required. | `/api/cover` |
@@ -343,7 +344,7 @@ Be honest about where this stands: it's adequate for a personal-scale app, and t
 ### 7.5 Reliability and availability
 
 - **Client-side resilience is the main availability strategy.** If Vercel or Supabase is down, readers can still open the app, read everything and capture new passages. Writes queue in the outbox. Only sign-in, sync, public pages and account deletion depend on the backend.
-- **Sync correctness:** the push clears `_dirty` only if the row wasn't edited again mid-upload (no lost edits under concurrency). Pulls are idempotent upserts. The cursor is persisted per table, so an interrupted sync resumes where it stopped. A single in-flight lock with a re-run flag prevents overlapping syncs.
+- **Sync correctness:** the push clears `_dirty` only if the row wasn't edited again mid-upload (no lost edits under concurrency). Pulls ask for the user's own rows only and are idempotent upserts. The cursor is persisted per table, so an interrupted sync resumes where it stopped. A single in-flight lock with a re-run flag prevents overlapping syncs.
 - **Durability:** the server copy is in Supabase Postgres (backups depend on plan; PITR is a paid add-on), and every device holds a full local copy. User-held ZIP export is the last resort.
 - **Single points of failure:** Supabase region (one project, one region). Free-tier projects **pause after about a week of inactivity**, which is an availability risk worth an alert or the paid plan.
 - **Deploys:** immutable Vercel deployments with instant rollback. The service worker uses network-first navigation with a 2.5s timeout, so new deploys reach users on next load. Cached hashed assets never go stale.
@@ -405,6 +406,7 @@ flowchart LR
 |---|---|---|
 | P1 | Content-Security-Policy (nonce-based) | Security: the session token is in localStorage, so XSS must be blocked |
 | P1 | CI: typecheck, lint, unit and E2E on every PR; deploy only from green `main`; migrations applied in the pipeline | Reliability, maintainability |
+| P1 | Serve shared content through visitor-safe views/functions instead of `public_read` on base tables: RLS filters rows, not columns, so the anon REST API currently returns whole shared rows (e.g. `goodreads_review`, `isbn`) | Privacy |
 | P1 | Error tracking (Sentry) plus an uptime alert, including for the Supabase pause | Observability |
 | P2 | `(select auth.uid())` in RLS policies; `book_id` indexes on child tables | Scalability |
 | P2 | Single-request `changes_since` sync with idle backoff | Scalability, cost |
