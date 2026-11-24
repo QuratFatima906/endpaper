@@ -1,8 +1,8 @@
-import { VERDICTS } from "@/lib/marks";
 import { getProfile, getShelf } from "../data";
 
 // The public shelf as data, at /@username/shelf.json, so another site can show it.
 // Same rows as the profile page: visibility = 'public' only, never unlisted.
+// status and verdict are stable keys, not labels: labels may change, the feed must not.
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request, { params }: { params: Promise<{ username: string }> }) {
@@ -17,7 +17,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ username
         title: b.title,
         author: b.author,
         status: b.status,
-        verdict: VERDICTS.find((v) => v.id === verdicts.get(b.id))?.label ?? null,
+        verdict: verdicts.get(b.id) ?? null,
         url: `${origin}/@${p.username}/${b.slug}`,
         updatedAt: b.updated_at,
       })),
