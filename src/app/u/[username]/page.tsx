@@ -19,7 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: name,
     description,
     openGraph: { title: name, description, type: "profile", username: p.username },
-    alternates: { types: { "application/json": `/@${p.username}/shelf.json` } },
+    // Also served at /u/<name>; canonical points search engines at the /@ URL.
+    alternates: { canonical: `/@${p.username}`, types: { "application/json": `/@${p.username}/shelf.json` } },
   };
 }
 

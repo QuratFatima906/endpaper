@@ -2,7 +2,8 @@ import { createClient } from "@supabase/supabase-js";
 import { expect, test, type BrowserContext } from "@playwright/test";
 
 // Real Supabase round trip. Opt-in: CLOUD_E2E=1 pnpm exec playwright test e2e/cloud.spec.ts --project=desktop
-// Needs .env.local with the Supabase keys and a dev/prod server using them on E2E_BASE_URL (default :3000).
+// Run it against a local Supabase (`supabase start`), never the hosted one: the README has the commands.
+// Needs the local keys in the env and a server using them on E2E_BASE_URL (default :3000).
 test.skip(!process.env.CLOUD_E2E, "set CLOUD_E2E=1 to run against Supabase");
 test.use({ baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3000" });
 
@@ -21,7 +22,9 @@ async function signedIn(context: BrowserContext, email: string, password: string
 }
 
 test("capture on one device, see it on another, delete everything", async ({ browser }) => {
-  const email = `e2e-${Date.now()}@example.com`;
+  // Random, not Date.now(): parallel workers can start in the same millisecond.
+  const run = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+  const email = `e2e-${run}@example.com`;
   const password = crypto.randomUUID();
   const { data: created, error } = await admin().auth.admin.createUser({ email, password, email_confirm: true });
   if (error) throw error;
@@ -32,7 +35,7 @@ test("capture on one device, see it on another, delete everything", async ({ bro
     const page = await phone.newPage();
     await page.goto("/library");
     await page.waitForURL("**/username");
-    const username = `e2e_${Date.now().toString(36)}`;
+    const username = `e2e_${run}`;
     await page.getByRole("textbox").first().fill(username);
     await page.getByRole("button", { name: "Continue" }).click();
     await page.waitForURL("**/library");

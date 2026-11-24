@@ -9,6 +9,15 @@ pnpm test         # unit tests (vitest)
 pnpm e2e          # end-to-end: builds, then runs phone + desktop (Playwright)
 ```
 
+The cloud round-trip test (`e2e/cloud.spec.ts`) runs against a local Supabase, never your hosted project. It needs Docker:
+
+```bash
+supabase start    # applies supabase/migrations. If image pulls hang, prefix SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io
+eval "$(supabase status -o env | sed -n 's/^API_URL=/export NEXT_PUBLIC_SUPABASE_URL=/p; s/^ANON_KEY=/export NEXT_PUBLIC_SUPABASE_ANON_KEY=/p; s/^SERVICE_ROLE_KEY=/export SUPABASE_SERVICE_ROLE_KEY=/p')"
+pnpm dev -p 3200 &
+CLOUD_E2E=1 E2E_BASE_URL=http://localhost:3200 pnpm exec playwright test e2e/cloud.spec.ts --project=desktop
+```
+
 First-time setup (Supabase, sign-in, Google, deploy) is in [docs/SETUP.md](docs/SETUP.md).
 
 ## How it fits together
