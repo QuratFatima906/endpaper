@@ -17,6 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     openGraph: { title, description, type: "article" },
+    alternates: { canonical: `/@${profile.username}/${book.slug}` },
     // Unlisted = anyone with the link, but not findable (R-PUB-3).
     robots: book.visibility === "unlisted" ? { index: false, follow: false } : undefined,
   };

@@ -24,6 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     openGraph: { title, description, type: "article", publishedTime: essay.published_at, authors: [profile.display_name || `@${profile.username}`] },
+    alternates: { canonical: `/@${profile.username}/${book.slug}/essay` },
     robots: book.visibility === "unlisted" ? { index: false, follow: false } : undefined,
   };
 }
