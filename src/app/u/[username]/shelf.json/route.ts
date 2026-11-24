@@ -22,6 +22,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ username
         updatedAt: b.updated_at,
       })),
     },
-    { headers: { "Access-Control-Allow-Origin": "*", "Cache-Control": "public, s-maxage=300" } },
+    // No CDN cache: a book made private must drop out at once, same as the profile page.
+    { headers: { "Access-Control-Allow-Origin": "*", "Cache-Control": "no-store" } },
   );
 }
