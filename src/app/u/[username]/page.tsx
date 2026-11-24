@@ -15,7 +15,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const p = await getProfile((await params).username);
   const name = p.display_name || `@${p.username}`;
   const description = p.bio || `${name}'s reading shelf on Endpaper.`;
-  return { title: name, description, openGraph: { title: name, description, type: "profile", username: p.username } };
+  return {
+    title: name,
+    description,
+    openGraph: { title: name, description, type: "profile", username: p.username },
+    alternates: { types: { "application/json": `/@${p.username}/shelf.json` } },
+  };
 }
 
 export default async function PublicProfile({ params }: Props) {

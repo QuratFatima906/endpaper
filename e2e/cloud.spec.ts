@@ -66,8 +66,14 @@ test("capture on one device, see it on another, delete everything", async ({ bro
     const visitor = await (await browser.newContext()).newPage();
     await visitor.goto(`/@${username}/${book!.slug}`);
     await expect(visitor.getByText("A sentence worth keeping.").first()).toBeVisible();
+    // Only public books are in the shelf feed, and going private drops them at once.
+    const shelf = async () => (await (await visitor.request.get(`/@${username}/shelf.json`)).json()).books.map((b: { title: string }) => b.title);
+    expect(await shelf()).toEqual([]);
+    await admin().from("books").update({ visibility: "public" }).eq("id", bookId);
+    expect(await shelf()).toEqual(["Synced Across Devices"]);
     await admin().from("books").update({ visibility: "private" }).eq("id", bookId);
     expect((await visitor.goto(`/@${username}/${book!.slug}`))!.status()).toBe(404);
+    expect(await shelf()).toEqual([]);
   } finally {
     await admin().auth.admin.deleteUser(uid);
   }

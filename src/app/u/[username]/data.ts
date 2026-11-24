@@ -92,8 +92,8 @@ export async function getBookData(raw: string, slug: string): Promise<PublicBook
 export async function getShelf(profileId: string) {
   const sb = client();
   const books = must(
-    await sb.from("books").select("id,title,cover_url,slug,updated_at").eq("user_id", profileId).eq("visibility", "public").is("deleted_at", null).order("updated_at", { ascending: false }),
-  ) as (Pick<Book, "id" | "title" | "cover_url" | "slug" | "updated_at">)[];
+    await sb.from("books").select("id,title,author,status,cover_url,slug,updated_at").eq("user_id", profileId).eq("visibility", "public").is("deleted_at", null).order("updated_at", { ascending: false }),
+  ) as (Pick<Book, "id" | "title" | "author" | "status" | "cover_url" | "slug" | "updated_at">)[];
   const ids = books.map((b) => b.id);
   if (!ids.length) return { books: [], verdicts: new Map<string, Verdict | null>(), essays: [] };
   const [refl, essays] = await Promise.all([
