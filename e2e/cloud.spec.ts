@@ -22,7 +22,9 @@ async function signedIn(context: BrowserContext, email: string, password: string
 }
 
 test("capture on one device, see it on another, delete everything", async ({ browser }) => {
-  const email = `e2e-${Date.now()}@example.com`;
+  // Random, not Date.now(): parallel workers can start in the same millisecond.
+  const run = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+  const email = `e2e-${run}@example.com`;
   const password = crypto.randomUUID();
   const { data: created, error } = await admin().auth.admin.createUser({ email, password, email_confirm: true });
   if (error) throw error;
@@ -33,7 +35,7 @@ test("capture on one device, see it on another, delete everything", async ({ bro
     const page = await phone.newPage();
     await page.goto("/library");
     await page.waitForURL("**/username");
-    const username = `e2e_${Date.now().toString(36)}`;
+    const username = `e2e_${run}`;
     await page.getByRole("textbox").first().fill(username);
     await page.getByRole("button", { name: "Continue" }).click();
     await page.waitForURL("**/library");
